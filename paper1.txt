@@ -1,0 +1,728 @@
+A site specific model and analysis of the neutral somatic mutation rate in whole-genome cancer data
+
+Background
+    Detailed modelling of the neutral mutational process in cancer cells is
+    crucial for identifying driver mutations and understanding the mutational
+    mechanisms that act during cancer development.  The neutral mutational
+    process is very complex: whole-genome analyses have revealed that the
+    mutation rate differs between cancer types, between patients and along the
+    genome depending on the genetic and epigenetic context. Therefore, methods
+    that predict the number of different types of mutations in regions or
+    specific genomic elements must consider local genomic explanatory variables.
+    A major drawback of most methods is the need to average the explanatory
+    variables across the entire region or genomic element. This procedure is
+    particularly problematic if the explanatory variable varies dramatically in
+    the element under consideration.
+
+Results
+    To take into account the fine scale of the explanatory variables, we model
+    the probabilities of different types of mutations for each position in the
+    genome by multinomial logistic regression.  We analyse 505 cancer genomes
+    from 14 different cancer types and compare the performance in predicting
+    mutation rate for both regional based models and site-specific models.  We
+    show that for $1000$ randomly selected genomic positions, the site-specific
+    model predicts the mutation rate much better than regional based models.  
+    
+    We use a forward selection procedure to identify the most important
+    explanatory variables.  The procedure identifies site-specific conservation
+    (phyloP), replication timing, and expression level as the best predictors
+    for the mutation rate.  Finally, our model confirms and quantifies certain
+    well-known mutational signatures. 
+    
+Conclusion    
+    We find that our site-specific multinomial regression model outperforms the
+    regional based models.  The possibility of including genomic variables on
+    different scales and patient specific variables makes it a versatile
+    framework for studying  different mutational mechanisms.  Our model can
+    serve as the neutral null model for the mutational process; regions that
+    deviate from the null model are candidates for elements that drive cancer
+    development.
+keyword
+Multinomial logistic regression
+site-specific model
+somatic cancer mutations
+keyword
+
+Background
+Cancer is driven by somatic mutations that convey a selective advantage to the
+cell. However, in most cases the somatic mutation rate in cancer cells is
+considerably higher than in healthy tissues, while only a
+small fraction of the mutations are thought to be associated with cancer
+development \ p{stratton2009cancer}. The majority of the mutations are
+neutral and are caused by perturbed cell division, maintenance
+and repair or over-expression of mutagenic proteins (e.g.  the APOBEC gene
+family \ p{Bacolla2014}). A comprehensive framework of the random mutation
+process in cancer cells is key to identify the regions, pathways and functional
+units that are under positive selection during cancer development. 
+
+The mutation rate varies along the genome, depending on genomic properties of
+the position such as the sequence context (e.g. the 5' and 3' nucleotides;
+\ p{AlexandrovEtAl13}), chromatin organisation \ p{PolakEtAl15} or
+replication timing \ p{lawrence2013mutational}. Many studies have
+investigated what determines the mutation rate and what kind of models should be
+used.  \ t{lawrence2013mutational} modeled the mutation heterogeneity using
+local regression with expression level and replication timing as explanatory
+variables.  \ t{PolakEtAl15} applied random forest regression on mutation
+counts in $1$Mb windows using histone modifications and the density of DNase I
+hypersensitive sites.  \ t{LochovskyEtAl15} predicted the number of mutations
+per element by a beta-binomial distribution using replication timing and
+noncoding annotations such as promoter, UTR and ultra-conserved sites.
+Unlike these approaches that segmented the genome into regions
+according to the explanatory variables and estimated separate models for them,
+in a site-specific regression model, this division is not necessary.
+\ t{MeltonEtAl15} implemented a Poisson-binomial model on 50kb windows, where
+they used logistic regression to predict the position-specific mutation
+probability, based on base-pair, replication timing and the presence and type of
+transcript. Here, we propose a framework based on multinomial regression that is
+able to model different types of substitutions. Unlike region-based models, we
+can use site-specific explanatory variables  without dividing the data into
+subsets. In this way, we use the full dataset to estimate the regression
+coefficients for all the explanatory variables. We include the
+trinucleotide context, GC content and CpG island annotations to describe the
+local base composition. Local properties of the genome related to transcription
+and replication are taken into account using expression level, replication
+timing, DNase1 hypersensitivity and genomic element types. To study the
+differences between somatic mutations and germline substitutions, we include the
+conservation score phyloP. We also include an explanatory variable to mask the
+repeat regions in the genome as mutation calls at repeat regions are biased due
+to technical reasons.  
+
+Generalized linear models also provide an interpretable framework for modeling and
+hypothesis testing. For example, we can estimate the mutation rates of
+CpG sites within and outside CpG islands, and test if they are different, and a 
+patient-specific intercept allows us to take the large variation of mutation
+rates between patients into account. 
+
+
+Here, we analyse 505 cancer genomes from 14 different cancer types
+\ p{FredrikssonEtAl14}. We compare the performance in predicting mutation
+probabilities of region-based Poisson models, site-specific binomial models and
+site-specific multinomial models. The site-specific multinomial model can
+predict both the overall mutation rate and mutation types accurately. 
+We use a forward model selection procedure to compare and
+identify the explanatory variables that best explain the heterogeneity of the
+site-specific mutational process (Figure 1).
+
+The forward model selection procedure is implemented using $2\%$ of the data
+while the final model fit is obtained from the remaining $98\%$. We find that
+site-specific conservation (phyloP), replication timing and expression level are
+the best predictors for the mutation rate. In general, the framework allows
+formal testing for inclusion of explanatory variables and also interaction
+terms. The impact of different explanatory variables can be inferred from the
+parameter estimates of our final model as the multiplicative changes in mutation
+rate. Our analysis confirms some known mutational signatures and it identifies
+associations with genomic variables like replication timing. It can also be used
+as the null model for cancer driver detection \ p{juul2017non} and other
+applications that rely on a model of the mutation rate (e.g. identification of
+the tissue of origin for tumors of unknown primary, \ alt{PolakEtAl15}).
+
+
+Results
+Heterogeneity of the mutation rate
+
+We observe significant heterogeneities of the mutation rate at multiple levels
+(Figure 2). The mutation rate varies among cancer types
+(Figure 2A): skin cutaneous melanoma, colorectal cancer and lung
+adenocarcinoma are the cancer types with the highest mean mutation rates ($5-10$
+mut/patient/Mb) while thyroid carcinoma, prostate adenocarcinoma and low-grade
+glioma are the lowest ($0.5-1$ mut/patient/Mb). The mutation rate also differs between
+samples from the same cancer type, with the largest variation seen for skin
+cutaneous melanoma (the mutation rate ranges from $1$ mut/patient/Mb to $150$
+mut/patient/Mb). 
+
+The mutation rate also varies between different genomic contexts (Figure 2B). As
+previously shown, we find that mutational signatures are cancer type specific by
+looking into the mutation rate for different trinucleotide contexts.
+For instance, the mutation rate at TC* sites is particularly
+high in skin cutaneous melanoma, with the largest proportion of mutations at TCC
+positions of all cancer types. The mutation rate at CpG sites is elevated in all
+the cancer types. In colorectal cancer, we observe a high proportion of
+mutations at TCG and TCT sites. These can be attributed to mutations in the
+\textit{POLE} gene that cause DNA polymerase $\epsilon$ deficiency
+\ p{ShinbrotEtAl14}: we find an increased overall mutation rate, a very high
+proportion of T[C$>$A]T and T[C$>$T]G mutations and a high contribution of
+COSMIC signature 10 in six out of 42 colon cancer samples. Five of those (and
+three of the other colon cancer samples) have a nonsynonymous mutation in
+\textit{POLE} and one of them in addition in \textit{POLD1}, which encodes the
+DNA polymerase $\delta$ (Supplementary Figure~S1). When the samples with
+\textit{POLE} mutation pattern are removed, the mutation pattern of the
+remaining colon cancer samples is very similar to most cancer types with a high
+proportion of mutations at CpG positions (Supplementary Figure~S2). 
+
+The mutation rate also differes between genomic environments defined by the
+explanatory variables (Figure 2B, 2C). Coding regions tend to have fewer
+mutations in all cancer types. Mutation rates are elevated for simple repeat
+regions, which might be related to mapping artefacts and ensuing technical
+challenges during mutation calling.  The effect of CpG islands varies between
+different cancer types. The mutation rate in CpG islands is higher than in
+regions outside for thyroid carcinoma, prostate adenocarcinoma, low-grade glioma
+and kidney chromophobe, while for colorectal cancer, lung adenocarcinoma, lung
+squamous cell carcinoma and skin cutaneous melanoma the situation is reversed.
+Regions that are late replicated, GC rich, evolutionarily less conserved, inside
+DNase1 peaks and lowly expressed have an elevated mutation rate. The explanatory
+power of the variables varies across cancer types as shown by the regression
+lines in Figure 2C.
+
+Granularity of regression models
+
+We model the mutation probability in cancer genomes using a set of regression
+models. The most coarse-grained description of the number of mutations in a
+region is a Poisson regression count model and the most fine-grained is a
+binomial or multinomial site-specific regression model. Here we describe and
+investigate in detail the (dis)advantages of these three models. A conceptual
+overview of the models is given in Figure 3A. 
+
+Poisson count regression model 
+
+In Poisson regression, the number of mutations in a genomic region of fixed
+length is modeled. The whole genome is divided into regions of pre-fixed length
+or according to the value of explanatory variables (e.g. segmented by genomic
+element types). Regression modeling is facilitated by summing the mutation
+counts and summarizing the annotations over the region.  
+
+We model the mutation count $N_{r, sam}$ in the $r$-th genomic region with
+length $L_r$ in sample $sam$. Furthermore, $can$ is the cancer type of the
+sample.  Mutations arise randomly with probability $p_{r,sam}$. As $p_{r, sam}$
+is small and $L_r$ is large, we have the Poisson approximation of the binomially
+distributed number of mutations
+
+
+For $J$ explanatory variables, the expected mutation count
+$\lambda_{r, sam}=L_r p_{r,sam}$ can be modeled by Poisson regression with a log-link:
+where for the $j$th explanatory variable,   $x_{r,j}$ is the average value of
+the annotation across region $r$ if the explanatory variable is continuous and
+for categorical explanatory variables, $x_{r,j}$ is derived from the proportions
+of different levels of the annotations in region  is the sample-specific intercept.
+
+
+
+In site-specific regression models, the mutation probability is modeled in each
+position of the genome. We enable regression modeling by binning the continuous
+annotations, such that we are able to sum mutation counts over positions with
+the same combination of annotations, and thereby reduce the size of the data
+set. We consider both site-specific binomial and multinomial regression models.
+
+
+We model the mutation probability $p_{i, sam}$ at a site $i$ in sample $sam$ of cancer
+type $can$. With a logit link, the mutation probability can be modeled by
+logistic regression: 
+where $x_{i,j}$ is the value of the $j$th explanatory variable at site $i$.
+
+
+
+We model the mutation probability for different mutation types. Assuming
+strand-symmetry, we are not distinguishing between e.g. A$>$G (A to T) mutations
+and  T$>$C mutations, $p^{\scriptscriptstyle{A > G}} = p^{\scriptscriptstyle{T >
+C}}$. We consider the strand with the C or T nucleotide, and the mutation
+probability matrix is 
+with only $6$ types of mutations.
+
+We model these mutation probabilities by setting up a multinomial logistic
+regression model, where dummy variables are used to distinguish between
+mutations from (G:C) base pairs and mutations from (A:T) base pairs.  The (G:C)
+basepairs are modelled with probabilities
+for (G:C) position $i$ in sample $sam$. With $J$ explanatory variables, the
+mutation probability at G:C position $i$ in sample $sam$ of cancer type $can$
+can be written as:
+Note that the probability for no mutation $p_{i, sam}^{\scriptscriptstyle{C >
+C}}$ is the reference.  Similarly, (A:T) basepairs are modeled with
+probabilities and the reference is the probability for no mutation We compare
+the performance of the three models on $2\%$ of the whole genome data. 
+
+The setting for the three models is shown in Figure 3A. Since we are mainly
+interested in their predictive performance, we have not included overdispersed
+models. Overdispersion is a way to model unexplained variance in the data, but
+it does not qualitatively change the predictions of a model. Each model is
+trained with replication timing, phyloP, and context information from the
+reference genome. For the region-based Poisson model, continuous annotation
+values are averaged over the selected region and GC percentages are calculated
+for each region. For the site-specific models, we use the site-specific
+annotations for each site. Continuous values are discretized to simplify the
+estimation process.     
+
+The results are shown in Figure 3B. 
+We compare the performance of these models at different resolutions using
+different datasets. In Figure 3B, we predict the mutation counts in large
+windows of length $100$kb. In Figures 3C, 3D, 3E, we predict the mutation counts
+in sets of $1000$ randomly sampled individual sites.  When predicting mutation
+counts in large windows ($100$ kb), the three regression models perform
+similarly.  For prediction in a randomly selected small number of sites ($1$
+kb), the two site-specific models out-perform the region-based model (Figure
+3C). The site-specific models can capture the mutational heterogeneities between
+sites and provide a more accurate mutation probability at any resolution. This
+is in contrast to the region-based model where a large number of sites are
+required for accurate predictions.  In addition to predicting the probability
+for mutation events, the multinomial regression model can also predict the
+probabilities of different mutation types. It outperforms the
+binomial model by taking the different mutation rates into account (Figure 3D,
+3E). 
+
+
+
+We consider the site-specific multinomial regression model to predict mutation
+probabilities for different mutation types at a single site.  We implement a
+forward model selection procedure to determine the explanatory variables in the
+final model (Figure 1). In each step, we add all possible new variables
+to the previous model in turn and rank the resulting new models. We identify and
+include the explanatory variable with the best fit and iterate the procedure
+several times. With forward model selection, we avoid the preparation of large
+analytical data tables that contain all potential explanatory variables (Section
+4.1.2).  We choose the deviance loss that measures the predictive performance of
+the model to assess the fit. By estimating it by cross-validation, we avoid
+overfitting, because it assesses the fit on an independent subset of the data
+
+By construction, the fit improves during the model selection procedure (Figure
+4A). We also evaluate McFadden's pseudo $R^2$ as a measure of the explained
+variance that is valid in categorical regression models (Section
+
+As a reference model, we start out with a single mutation rate for the whole
+genome in all samples (Model 1; Figure 4A). This model cannot explain any of the
+variation in the mutation rate between samples and positions, so McFadden's
+pseudo $R^2=0$.  After including the six strand-symmetric mutation types in the
+model (Model 2), we add cancer and sample specific intercepts (Model 3 and Model
+4) to make sure that we account for sample-specific mutation rates. In the next
+step, we include the left and right neighboring base-pair for each cancer type
+(Model 5). 
+
+Starting with Model 5, additional annotations are added using forward model
+selection. We consider the phyloP score, replication timing, expression, genomic
+segments, GC content in $1$ kb, CpG islands, simple repeats and DNase1
+hypersensitivity. For each of these variables, cancer specific regression
+coefficients are estimated to allow for differences in the mutational process
+between cancer types. For expression, we use data directly obtained from
+matching tumor types, so we also take expression differences between cancer
+types into account. 
+
+The annotation with the largest decrease in the deviance loss function is the
+phyloP score (Model 6). Subsequently, replication timing (Model 7) and gene
+expression (Model 8) are added. At this point, we stop the model selection
+procedure to avoid the time-consuming creation of larger count tables (see
+Section \ref{sec:count_table} for details) as we also see that the improvement
+of the fit levels off. Detailed results for each step of the forward selection
+procedure are provided in Supplementary Section S2.1.  To assess the robustness
+of the results, we rerun the forward model selection procedure five times on
+randomly selected regions that cover 2\% of the whole genome. The ranking of the
+variables is constant for all the experiments (Supplementary Section~S2.2). 
+
+Adding the context in model 5 gives a substantial improvement over model 4. When
+the phyloP score is added in model 6, it can be seen in Figure 4b that it
+considerably changes the predicted mutation rate for the same nucleotide triplet
+at two  positions with different phyloP score. While the trinucleotide context
+and the phyloP score vary on a basepair scale, both replication timing and
+expression vary on a kilo-base scale. Even though much of the per-base-pair
+variation in the mutation rate is already captured in Models 5 and 6, the
+long-range variation is considerably better explained in Model 7 and Model 8
+(Figure 4B). We can see that adding replication timing in Model 7 considerably
+changes the predicted mutation rate obtained from Model 6 that is relatively
+uniform in the $1.1$ Mb region shown in the figure, by taking
+the replication timing gradient in the region into account. Finally, in Model 8,
+the mutation rate in highly expressed regions is lowered, which again improves
+the prediction. 
+
+Driver detection methods, such as MutSigCV \ p{lawrence2013mutational} and
+ncdDetect \ p{juul2017non}, are generally based on a model of the neutral
+mutation rate in tumors. We use two typical cancer genes, the oncogene
+\textit{KRAS} and the tumor suppressor gene \textit{TP53}, to contrast the
+observed mutation pattern in a driver to the predicted neutral mutation rate. 
+
+In Supplementary Figure S4, it is obvious that the predicted mutation rate is
+lower at the gene body of \textit{KRAS} than right outside of it. A zoom onto
+exon 2 shows a cluster of mutations at positions 25,398,281-5, with 25 mutations
+at position 25,398,284-5 which cause a change of protein. This cluster is highly
+unlikely under our neutral model. 
+
+For \textit{TP53}, we also find a lower predicted mutation rate at the gene body
+of \textit {TP53} and the overlapping gene \textit{WRAP53} (Supplementary
+Figure~S5). Here, the observed mutations are more spread than in KRAS, but they
+mainly occur in highly conserved exonic regions, where the neutral model
+predicts a low mutation rate. 
+
+
+Upon determining the final model from the model selection procedure, we estimate
+parameters for the multinomial logistic regression model on the remaining $98\%$
+of the genome. To study the difference between cancer types, all
+position-specific explanatory variables are stratified by cancer type. The
+coefficients represent multiplicative changes in mutation rate.  Our results
+confirm the large differences in mutation pattern both between samples and
+cancer types, but also between different genomic and epigenomic regions. 
+
+We observe that regions that have been highly conserved during human evolution
+have a lower mutation rate in all cancer types and for all mutation types, and
+this difference is nearly always significant (Figure 5A). For
+kidney chromophobe and prostate adenocarcinoma, it is reduced to less than half
+for some of the mutation types. In breast cancer, head and neck squamous cell
+carcinoma, kidney chromophobe and thyroid carcinoma, this difference is
+significantly more pronounced at A:T positions than at G:C positions, but there
+is no general pattern with respect to the mutation type.
+
+
+As previously described \ p{lawrence2013mutational}, we nearly always find a
+positive association between replication timing and mutation rates (see
+regression lines in Figure 2C; later replicating regions have more mutations),
+but the regression coefficient varies significantly between the different cancer
+types and the mutation types (Figure 5B).   For the dummy variable
+that distinguishes gene bodies, where expression is measured, from intergenic
+regions, we see a mixed pattern of insignificant and negative regression
+coefficients where the mutation rate in gene bodies is reduced to up to one
+third of the rate in intergenic regions (low-grade glioma;
+Figure 5C). The only exception is melanoma with a
+slightly increased mutation rate in gene bodies. 
+
+Also when we consider regions within gene bodies, we find a reduced mutation
+probability in highly expressed regions for most cancer types.  The most extreme
+example is the probability of a C $>$ T mutation in highly expressed regions in
+melanoma, which is only one fifth of the probability in lowly expressed ones
+(Figure 5D). Low-grade glioma, prostate adenocarcinoma
+and thyroid cancer show the opposite pattern for some of the mutation types,
+though. However, this effect is dampened by the dummy variables for the gene
+body that have comparably large coefficients of the opposite sign for these
+three cancer types.
+
+We find that the mutation rates differ between the different types of mutations,
+but also between the specific contexts that we consider: CpG, to capture the
+pattern of spontaneous deamination, and TpCp[AT], to capture the APOBEC
+signature.  We find that the C $>$ T mutation rate is higher in CpG sites than
+in other sites in all cancer types. In skin cutaneous melanoma, we also observe
+elevated mutation rate for CC context, which is related to the elevated CC $>$
+TT mutation rate due to UV light signature \ p{rass2008uv}.  We observe
+elevated rates of mutations that fit the APOBEC pattern in breast cancer bladder
+urothelial carcinoma, head and neck squamous cell carcinoma, lung squamous cell
+carcinoma and skin cutaneous melanoma.
+
+We use a multinomial logistic regression model to analyse the somatic mutation
+rate in each position of a cancer genome. We consider various genomic features,
+such as the local base composition, the functional impact of a region and
+replication timing. Because of the site-specific formulation, the model is the
+most fine-grained description of the mutation rate, while it can still take
+genomic properties into account that vary or are measured on a longer scale,
+like replication timing and expression levels. 
+
+The mutational spectrum and intensity are known to vary considerably between
+cancer types as well as between patients with the same cancer type
+\ p{lawrence2013mutational}. In our analyses, we capture a considerable part
+of the variance by including cancer type and sample specific mutation rates.
+
+We find the site-specific phyloP conservation scores to explain more than any of
+the other explanatory variables we tested. The conservation scores reflect the
+germline substitution rate between species through evolution and are designed to
+capture the effect of selection \ p{PollardEtAl10}. However, somatic
+evolution of the cancer genome is not subject to the same constraints as
+germline evolution. In particular, purifying selection may be relaxed as many
+genes and regulatory elements that are needed during the organismal life cycle
+are dispensable for the growth of cancer cells \ p{de2014purifying}. Instead,
+the conservation scores' explanatory power in our study may stem from their
+correlation with genes and other functional elements, with special properties
+that affect their mutation rate. In particular, it is known that the mutation
+rate is elevated at transcription factor binding sites in some cancer types
+\ p{SabarinathanEtAl15}. Furthermore, the phyloP scores are also correlated
+with expression regions and open chromatin, which both have decreased mutation
+rates due to transcription-coupled repair and other repair mechanisms
+\ p{su2015interactions}.
+
+The second explanatory variable added is replication timing. This has not only
+been found for cancer genomes \ p{lawrence2013mutational}, but also for
+germline mutations \ p{stamatoyannopoulos2009human} and somatic mutations in
+healthy tissue \ p{KorenEtAl12}. In late replicating regions, single stranded
+DNA (ssDNA), which is susceptible to mutagenic processes like deamination,
+accumulates \ p{stamatoyannopoulos2009human}. Varying intensities of such
+mutational processes could explain the differences in the impact of replication
+timing between the cancer types and the mutation types. The different strengths
+of the associations between replication timing and the mutation rate can also be
+attributed to differences in replication timing between cell types
+\ p{HansenEtAl10} that may be missed in the replication timing dataset at
+use, which is obtained from HeLa cell lines \ p{ChenEtAl10}. 
+
+
+Only after the phyloP score and replication timing, the cancer type specific
+expression level is added to the model. This can be explained by the fact that
+the phyloP score and expression are correlated, as mentioned above, and so are
+replication timing and expression \ p{RhindGilbert13}: protein-coding genes
+are concentrated in early replicating regions. However, expression levels that
+we use are tissue specific and might therefore improve the fit of the model
+further for that reason.
+
+By separately estimating a regression coefficient for the gene-body and one for
+the expression level within gene bodies, we can potentially distinguish the
+general properties of genes, like location with respect to replication timing
+origins and sequence composition, and the intensity of transcription-coupled
+repair (TCR). Since TCR is a subpathway of nucleotide excision repair (NER), it
+is expected to act on helix-distorting mutations like for example the well-known
+UV light induced CC $>$ TT mutations in melanoma. Thus, the cancer specific
+differences that we see might be explained by varying effectiveness of TCR, but
+also by different proportions of mutations that create bulky distortions. For
+example, the rate of C $>$ T mutations is further decreased in highly expressed
+regions in melanoma than the other mutation types.
+
+The parameters can be interpreted as multiplicative mutation rate changes. By
+using interaction terms, it is straightforward to analyse and test differences
+in mutation rate between cancer types, samples or specific genomic regions of
+interest. Furthermore, generalized linear models come with a natural framework
+for hypothesis testing, e.g. to compare two subcohorts of interest within the
+same model, like \textit{POLE} mutated versus \textit{POLE} wildtype colorectal
+cancer samples, or NER deficient tumors versus NER proficient ones. It would be
+interesting to compare our model-based description of the mutation rate to
+unsupervised learning of mutational signatures by matrix factorization
+\ p{AlexandrovEtAl13}. 
+
+In the logistic regression model, we can estimate cancer type specific
+regression coefficients to capture the differences between cancer types. We can
+also include tissue specific explanatory variables if there are measurements for
+the corresponding cancer tissue or matching healthy tissue available. This is of
+particular interest for epigentic measurements like histone modifications, where
+the tissue of origin has been shown to be informative \ p{PolakEtAl15}.
+
+Patient-specific characteristics can also be added as explanatory variables. The
+age of the patients could be used to study clock-like mutational processes
+\ p{AlexandrovEtAl15}. Known somatic or germline mutations that are
+associated with specific mutational processes or repair pathways can also be used
+as explanatory variables, e. g. a germline deletion of \textit{APOBEC3B} that
+fuses APOBEC3A with the 3' UTR of APOBEC3B has been found to be associated with
+an increased number of APOBEC-type mutations  \ p{Nik-ZainalEtAl14}. The
+impact of this mutation could be studied by including an interaction term with
+the TpCp[AT] positions.
+
+Our model is very flexible and versatile and the explanatory variables can be
+customized according to different applications. We provide software that
+facilitates similar position-specific analyses on new mutation datasets with a
+user-specified set of genomic annotations as explanatory variables. First, an
+analytical data table is created for the whole genome or a specified set of
+genomic regions (implemented in python). This table can be updated with new
+samples at any time. Then, a multinomial logistic model can be estimated. This
+is implemented in R and mimics the interface of standard R functions like
+\texttt{glm}.
+
+An important application of the model is the prediction of the somatic mutation
+probability under the assumption of neutrality. In our driver detection method
+ncdDetect \ p{juul2017non}, we use the position-specific predictions that we
+obtain from the multinomial model to evaluate if the mutation rates or their
+distributions are significantly different from the expectation under neutrality.
+This allows a flexible analysis of regions of any size. Even non-contiguous
+regions with very different properties than the overall genomic patterns can be
+investigated.
+
+
+We use SNV calls from 505 tumor-normal samples across 14 different cancer types
+from \ t{FredrikssonEtAl14}. We build our data set based on the UCSC hg19
+assembly.  We removed regions with low mappability, ultra-high mutation rates
+and lacking annotation.  Problematic regions for NGS alignments identified for
+the ENCODE project \ p{BernsteinEtAl12} were subtracted.  Low mappability
+regions, defined by the GEM tool \ p{DerrienEtAl12} and CRG Alignability
+track from UCSC with mappability less than $0.5$ in 100-mers, were also
+subtracted.  Hyper-mutated genomic segments containing Immunoglobulin/T-cell
+receptor (IG/TR) genes defined by GENCODE together with 10 kb flanking regions,
+combined when less than 100 kb in distance, were excluded from analysis.  We
+also excluded sites on ChrX and ChrY, because for some of the annotation files
+we lack information for one or both of the sex chromosomes.
+
+A total number of $14,200,393$ SNVs are observed in the subtracted regions for
+$505$ samples across $14$ cancer types. 
+
+\paragraph*{Genomic element types} 
+
+We divided the genome into six types of genomic elements: coding, 5' UTR, 3'UTR,
+ncRNA, intron and intergenic.  Based on the GENCODE v.19 transcripts, coding
+regions, 5' UTR regions and 3' UTR regions as well as introns were defined for
+protein-coding transcripts. Non-coding RNA regions were defined as all remaining
+regions in the full transcript set.  All remaining bases were categorized as
+intergenic.
+
+\paragraph*{GC content}
+We calculate the percentage of G:C base pairs in 1 kb windows based on the
+reference genome. Regions with GC percentage less than $10\%$ are annotated with
+value $0$. Other regions are discretized into quartiles. 
+
+\paragraph*{CpG islands}
+We segmented the genome by presence or absence of CpG islands. The CGI Mountain
+annotation from CgiHunter (\url{http://cgihunter.bioinf.mpi-inf.mpg.de/}) was
+used. The CGI Mountain score quantifies if a region is a CpG island. Scores
+above zero indicate a CpG island.  We use a dummy variable derived from the CGI
+Mountain score in our analysis  indicating whether the CGI Mountain score is
+larger than zero.
+
+\paragraph*{Simple repeats}
+We annotated the simple repeat regions in the genome according to RepeatMasker
+(\url{http://www.repeatmasker.org}), which defines the interspersed and
+low-complexity repeats in hg19. We use a dummy variable to indicate whether a
+genomic site is in a region masked as simple repeats.
+
+
+\paragraph*{DNase I peaks}
+We defined DNase I peaks according to the DNase I annotation from the Roadmap
+Epigenomics project \ p{RoadmapEpigenomicsEtAl15}. We use the score from
+HoneyBadger2 to indicate the DNase I signal strength for regions with a DNase I
+peak (\url{http://www.broadinstitute.org/~meuleman/reg2map/}). The regions not
+annotated in the HoneyBadger2 were masked as ``no peak'' regions in our
+analysis. The values of peaks are approximatedly between 0.4
+and 1, with 1 being highly accessible.
+
+
+\paragraph*{PhyloP score}
+The conservation score phyloP (phylogenetic $p$-values) is part of the PHAST
+package (\url{http://compgen.bscb.cornell.edu/phast/}). We used the score from
+the multiple alignments of $99$ vertebrate genomes to the human genome
+\ p{PollardEtAl10}. We use the version of phyloP100way which covers $99.8\%$
+of the subtracted regions.
+
+
+\paragraph*{Replication timing}
+We adjust the replication timing data from \ t{ChenEtAl10} to the hg19
+assembly. The replication timing values range from $0$ to $1$, indicating
+earlier to later replicating regions. The replication timing annotation covers
+$91.2\%$ of the subtracted regions.
+
+
+\paragraph{Gene expression}
+We define the gene expression level according to TCGA RNAseq expression data.
+Expression data was $\log_2(x+1)$ transformed. For each cancer type, the median
+expression was calculated for all genes. If multiple annotations of a gene
+exist, the longest annotation is used. For overlapping genes, the expression is
+a cumulative sum.
+
+As in \ t{FredrikssonEtAl14}, we collapse colon (COAD) and rectal carcinoma
+(READ) to a joint cancer type CRC by averaging across the expression values.
+
+
+In order to facilitate the model fitting procedure, we summarized the genomic
+data into count tables. In Poisson count models, each row in the count table
+represents a pre-defined region. For continuous explanatory variables, such as
+replication timing, the annotations are averaged over the region. For
+categorical explanatory variables, the annotations are transformed to the
+percentage for different levels of the variables, e.g, the binary explanatory
+variable indicating whether the site is a (G:C) base pair or not is transformed
+to GC content of the window.  In site-specific regression models, we discretized
+continuous variables into bins according to quartiles or quintiles.  Each row in
+the count table represents the counts of mutations under a certain combination
+of levels of all the explanatory variables. As we are summarizing the whole
+genome in the count table, we expect to see all the combinations of the levels
+for all the explanatory variables. Thus, the sizes of the count tables grow
+significantly when adding new explanatory variables. The generation of the count
+tables also takes much longer time with more explanatory variables. Because of
+the space and time consumption, a large count table including all the
+explanatory variables is computationally infeasible. We implemented the forward
+model selection procedure to avoid many huge count tables.  For each iteration
+in the forward model selection procedure, we made new count tables only for the
+selected sets of  explanatory variables from previous step and one new candidate
+explanatory variable. We then added the best candidate in the explanatory
+variable set and repeated for the next step. We used $2\%$ of the whole genome
+in the model selection and made a final count table with the remaining $98\%$
+sites only for the explanatory variables that were determined from the model
+selection procedure.  The generation of the count table for the final model
+takes $6,000$ CPU hours on our cluster (2.5GHz CPUs).
+
+
+The observations in the regression model are indexed by the genomic position $i
+(1 \leq i \leq 2.56\cdot10^9)$ for all positions on chr1 to chr22 after
+excluding problematic regions and the samples $\text{\it sam} (1 \leq \text{\it
+sam} \leq 505)$, so the total number of observations is $1.3 \cdot 10^{12}$.
+\textcolor{black}{Starting from Model 4, sample specific intercepts for the six
+mutation types sum up to $6\cdot505=3030$ parameters. 
+The regression coefficients for explanatory variables are indexed by the $14$
+cancer types.  In Model 5 each cancer type has $4\cdot 4 \cdot 6 =96$ parameters
+for the neighboring context and the mutation type ($4$ for the left neighboring
+site, $4$ for the right neighboring site and $6$ for the mutations), so the
+total number of parameters in this model is $6 \cdot 505 + 14 \cdot 96 =
+4374$.From Model 6 to Model 8 we use $1$ parameter for each of the continuous
+explanatory variables phyloP, replication timing and expression level. We also
+add $1$ dummy variable for expression level indicating whether the given site is
+potentially expressed or not.  In Model 6 we have $4374 + 14 \cdot 6 = 4458$
+parameters. In Model 7 we have $4458 + 14 \cdot 6 = 4542$ parameters. In the
+final model we have $6 \cdot 505 + 14 \cdot 96 + 14 \cdot (3 + 1) \cdot 6 =
+4710$ parameters in total.} To reduce memory usage and computation time, the
+parameters are estimated in three separate binary logistic regression models,
+but the variance-covariance matrix of the parameters is estimated for the
+multinomial model \ p{BeggGray84}. We have implemented an
+R-package for the estimation \ p{R2014} that is based on the function
+\texttt{glm4} from the contributed package \texttt{MatrixModels}
+\ p{RMatrixModels}. It also includes estimation of the variance-covariance
+matrix using the package \texttt{Matrix} for efficient handling of large and
+sparse matrices \ p{RMatrix}.
+
+
+If a model with many explanatory variables and interaction terms among them is
+estimated (e.g. sampleID $\times$ neighbors $\times$ strong), it can easily
+occur that for a certain combination of levels of categorical variables, there
+have been no mutations of a certain type observed. This case is especially
+likely, if the sampleID is involved. This causes numerical problems in the
+maximum likelihood estimation \ p{Agresti}.
+
+To solve this problem while still obtaining a positive mutation probability, we
+add pseudo counts to the observed mutation counts. This is equivalent to
+specifying a Dirichlet prior for the multinomial model, so it leads to the same
+point estimates as the posterior mean would in a Dirichlet-Multinomial model
+\ p{DurbinEtAl}. 
+
+To reduce the impact of the pseudo counts, we only add them to combinations of
+levels with no observed mutations and we do not use a uniform distribution, but
+let them be proportional to the observed mutation counts from all samples of the
+corresponding cancer type. The mutation counts from the sample and from the
+cancer type are equally weighted. 
+
+Let  be the
+number of each type of mutations for the combination of levels $K$ in sample
+$sam$ with at least one of the mutation counts being zero, and  be the mutation counts for
+combination $K$ for all samples of cancer type $can$. Let $N_{K, \text{sam}}$
+and $N_{K, \text{can}}$ be the total count of mutations of category $K$ for the
+sample and cancer type, respectively. Then, the new count vector
+$\tilde{\textbf{n}}_{K, \text{sam}}$ is defined as 
+Consequently, the number of mutations per sample is preserved. The new mutation
+counts can be non-integers, but this can be handled by our implementation. 
+
+
+
+To assess the fit of a model, we report McFadden's pseudo $R^2$ 
+where $L_M$ is the likelihood of the model under investigation and $L_0$ is the likelihood of a model
+with no predictors \ p{McFadden74}. To measure the improvement of a model in
+comparison with the binomial model where there is no distinction between the
+mutation types, we use the same mutation probability for each mutation type in
+the model without predictors.
+
+
+To speed up data preparation, forward variable selection is conducted on a
+subset of approximately 2\% of the genome, each of which is constructed by
+randomly selecting $60,000$ windows of size $1$ kb.  
+
+The cancer types kidney chromophobe, low-grade glioma, prostate adenocarcinoma
+and thyroid carcinoma have very low mutation counts, so they are disregarded
+during variable selection. We use cross-validation for forward variable
+selection. The improvement of the fit along the model selection procedure is
+measured with the deviance loss.
+
+
+Starting with Model 5, 
+additional terms of the form 
+with explanatory variable $j \in $ \{phyloP, replication timing, genomic
+segment, expression, GC content, DNase1, simple repeats, CpG island\}, are
+selected following the forward selection scheme. 
+
+To test the robustness of the selected model, the forward variable selection
+procedure is repeated five times.
+
+
+
+An assessment of the fit of a model can be obtained by cross validation.
+Five-fold cross validation is used to select the annotation with the highest
+explanatory power. To this end, the 1 kb windows of the variable selection
+subset are divided randomly among 5 sets. In turn, 4 of them are joined as the
+training set, on which the multinomial model is estimated, and the remaining set
+is used as the validation set to estimate the loss function.
+
+The deviance loss function for the observed site $i$ in sample $sam$ is
+defined as 
+
+where $k$ denotes all possible mutation events at site $i$, $y_{i, sam}$ the
+observed event at site $i$ in sample $sam$ and $\hat{p}(y_{i, sam}=k)$ the
+probability of event $k$ estimated under the multinomial regression model
+\ p{HastieEtAl}. Thus, it measures the
+prediction accuracy of the multinomial regression model. The total deviance loss
+of a model is 
+with $N$ being the number of genomic positions.
+
+
+
+
+TCR transcription-coupled repair
+
+
+NER Nucleotide excision repair
+
+
